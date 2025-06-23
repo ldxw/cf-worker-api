@@ -5,7 +5,7 @@ import manifest from '__STATIC_CONTENT_MANIFEST'
 import * as local from "hono/cookie";
 import * as oneui from './driver/onedrive_oa';
 import * as aliui from './driver/alicloud_oa';
-import * as aliui2 from './driver/alicloud_qr';
+import * as aliui2 from './driver/alicloud_cs';
 import * as ui115 from './driver/115cloud_oa';
 import * as ui123 from './driver/123cloud_oa';
 import * as baidu from './driver/baiduyun_oa';
@@ -25,7 +25,7 @@ export type Bindings = {
     dropboxs_uid: string, dropboxs_key: string,
 }
 
-const app = new Hono<{ Bindings: Bindings }>()
+export const app = new Hono<{ Bindings: Bindings }>()
 app.use("*", serveStatic({manifest: manifest, root: "./"}));
 // 登录申请 ##############################################################################
 app.get('/dropboxs/requests', async (c) => {
