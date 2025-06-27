@@ -2,7 +2,7 @@ import {Context} from "hono";
 import * as local from "hono/cookie";
 import * as configs from "../shares/configs";
 import * as refresh from "../shares/refresh";
-import {getCookie, setCookie} from "../shares/request";
+import {getCookie, setCookie} from "../shares/cookies";
 import {pubLogin} from "../shares/oauthv2";
 import {encodeCallbackData, Secrets} from "../shares/secrets";
 
@@ -62,6 +62,7 @@ export async function alyLogin(c: Context) {
     const result = await pubLogin(c, JSON.stringify(params_info), request_urls,
         false, "POST", "json",
         {'Content-Type': 'application/json'});
+    if(!result.qrCodeUrl) return c.json({"text": result.message}, 500);
     return c.json({"text": result.qrCodeUrl, "sid": result.sid}, 200);
 }
 
@@ -74,8 +75,8 @@ export async function alyToken(c: Context) {
     if (!clients_info.drivers) return c.json({text: 'No Cookies',}, 401);
     if (!oauth_type) oauth_type = "authorization_code";
     const req: AliAccessTokenReq = {
-        client_id: clients_info.servers  ? c.env.alicloud_uid : <string>c.req.query('client_id'),
-        client_secret: clients_info.servers ? c.env.alicloud_key : <string>c.req.query('client_secret'),
+        client_id: clients_info.servers  ? c.env.alicloud_uid : <string>c.req.query('client_id') || clients_info.app_uid,
+        client_secret: clients_info.servers ? c.env.alicloud_key : <string>c.req.query('client_secret') || clients_info.app_key,
         grant_type: <string>oauth_type,
         code: <string>c.req.query('code'),
         refresh_token: <string>c.req.query('refresh_token')
