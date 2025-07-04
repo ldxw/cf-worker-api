@@ -12,20 +12,17 @@ async function getLogin(refresh = false) {
     let check_flag = true;
     // 验证秘钥情况 ==================================================
     if (!server_use) {
-        if (driver_txt !== "alicloud_cs" && driver_pre !== "baiduyun")
+        if (driver_txt !== "alicloud_cs"
+            && driver_txt !== "alicloud_tv"
+            && driver_pre !== "baiduyun")
             if (client_uid === "" || client_key === "")
                 check_flag = false
         if (driver_pre === "baiduyun")
             if (secret_key === "" || client_key === "")
                 check_flag = false
         if (!check_flag) {
-            await Swal.fire({
-                position: 'top',
-                icon: 'info',
-                title: '获取失败',
-                text: '请先填写AppID和AppKey',
-                showConfirmButton: true,
-            });
+            await showErrorMessage("执行操作",
+                '请先填写AppID和AppKey')
             return;
         }
     }
@@ -38,13 +35,8 @@ async function getLogin(refresh = false) {
     let base_urls = "/requests?client_uid="
     if (refresh) {
         if (!refresh_ui) {
-            await Swal.fire({
-                position: 'top',
-                icon: 'info',
-                title: '刷新失败',
-                text: '请先填写Refresh Token',
-                showConfirmButton: true,
-            });
+            await showErrorMessage("刷新令牌",
+                '请先填写Refresh Token')
             return;
         }
         base_urls = "/renewapi?client_uid="
@@ -63,11 +55,11 @@ async function getLogin(refresh = false) {
         const response = await fetch(post_urls, {
             method: 'GET', headers: {'Content-Type': 'application/json'}
         });
-        // 解析响应内容 ===============================================
-        const response_data = await response.json();
+        let response_data = {}
         // 刷新令牌模式 ===============================================
         if (refresh) {
             if (response.status === 200) {
+                response_data = await response.json();
                 const access_key = document.getElementById("access-token")
                 access_key.value = response_data.access_token;
                 refresh_ui = document.getElementById("refresh-token")
@@ -78,16 +70,13 @@ async function getLogin(refresh = false) {
                     showConfirmButton: true,
                     timer: 1000
                 });
-            } else await Swal.fire({
-                icon: 'error',
-                title: '刷新令牌失败',
-                text: response_data.text,
-                showConfirmButton: true,
-            });
+            } else await showErrorMessage("刷新令牌",
+                response.statusText, response.status)
             return;
         }
         // 申请登录模式 ================================================================
         if (response.status === 200) {
+            response_data = await response.json();
             if (driver_txt === "baiduyun_go" || driver_txt === "alicloud_go"
                 || driver_pre === "onedrive" || driver_pre === "115cloud"
                 || driver_pre === "googleui" || driver_pre === "yandexui"
@@ -130,7 +119,7 @@ async function getLogin(refresh = false) {
                     icon: 'info',
                     title: '扫码登录',
                     html: `<div>请扫码登录，完成后点确定</div>` +
-                        `<img src="${response_data.text}" alt="">`,
+                        `<img src="${response_data.text}" alt="" style="max-width: 400px;">`,
                     showConfirmButton: true
                 });
                 post_urls = "/alicloud/callback" +
@@ -138,7 +127,8 @@ async function getLogin(refresh = false) {
                     "&client_secret=" + client_key +
                     "&server_use=" + server_use +
                     "&grant_type=" + "authorization_code" +
-                    "&code=" + sid
+                    "&code=" + sid +
+                    "&sid=" + sid
                 let auth_post = await fetch(post_urls, {method: 'GET'});
                 let auth_data = await auth_post.json();
                 if (auth_post.status === 200) {
@@ -153,28 +143,13 @@ async function getLogin(refresh = false) {
                     window.location.href = "/#" + encodeCallbackData(callbackData);
                     location.reload();
                     await getToken();
-                } else await Swal.fire({
-                    position: 'top',
-                    icon: 'info',
-                    title: '登录失败',
-                    html: auth_data.text,
-                    showConfirmButton: true
-                });
+                } else await showErrorMessage("登录令牌",
+                    auth_data.text, response.status);
             }
 
-        } else await Swal.fire({
-            icon: 'error',
-            title: "获取秘钥失败",
-            text: response_data.text,
-            showConfirmButton: true,
-        });
+        } else await showErrorMessage("获取秘钥", response.statusText, response.status);
     } catch (error) {
-        await Swal.fire({
-            icon: 'error',
-            title: '获取秘钥失败',
-            text: error,
-            showConfirmButton: true,
-        });
+        await showErrorMessage("获取秘钥", error, 500);
     }
 }
 

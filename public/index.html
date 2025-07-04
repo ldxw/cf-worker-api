@@ -13,7 +13,7 @@
 </head>
 <body>
 <div class="toggle-theme">
-    <button class="btn btn-outline-secondary" onclick="toggleTheme()">切换主题</button>
+    <button class="btn btn-outline-secondary" onclick="toggleTheme()" style="z-index: 100;">切换主题</button>
 </div>
 <div class="container form-container">
     <h2 class="text-center mb-4">🔐 OpenList Token 获取工具</h2>
@@ -95,10 +95,14 @@
     </div>
     <div class="text-muted text-center">
         <p style="text-align:center">
-            本工具所有信息只以Cookie形式存储于浏览器本地<br>
+            本工具所有用户信息只以Cookie形式存储于浏览器本地<br>
             开源于 <a href="https://github.com/OpenListTeam/OpenList-OnlineAPI" target="_blank">GitHub</a> | By <a
                 href="https://github.com/OpenListTeam"
                 target="_blank">OpenListTeam</a>
+        </p>
+        <p id="eo-show" style="text-align:center" hidden="true">
+            本工具国内CDN加速及安全防护由<a href="https://edgeone.ai/zh?from=github" target="_blank">Tencent EdgeOne</a>赞助
+            <br><img src="https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png" style="width: 150px"/>
         </p>
     </div>
 </div>
@@ -164,6 +168,9 @@
     const shared_btn_views = document.getElementById('sharepoint-btn-view');
     const shared_uid_views = document.getElementById('sharepoint-uid-view');
     const url_hash = window.location.hash.substring(1); // 去掉地址栏上的#号
+    const current_host = window.location.protocol + "//" + window.location.host;
+    if (window.location.host === "api.oplist.org.cn")
+        document.getElementById('eo-show').hidden = false;
     getToken();
     // 阿里云盘扫码v2相关变量
     let alicloud2SessionId = null;
