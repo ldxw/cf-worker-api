@@ -39,11 +39,11 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false
-          tags: ldxw/openlist_api_server
+          tags: ldxw/openlist:api_server
           labels: latest
           
     - name: Push Docker Image to ghcrio
-      run:     docker push ldxw/openlist_api_server:latest
-            && docker tag  ldxw/openlist_api_server:latest ghcr.io/ldxw/openlist_api_server:latest
+      run:     docker push ldxw/openlist:api_server
+            && docker tag  ldxw/openlist:api_server ghcr.io/ldxw/openlist_api_server:latest
             && docker push ghcr.io/ldxw/openlist_api_server:latest
   
