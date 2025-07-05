@@ -19,6 +19,9 @@ jobs:
     steps:
     - name: Check out the repo
       uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
       
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -33,17 +36,14 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
           
-    - name: Build and push Docker Image
-      uses: docker/build-push-action@v3
+    - name: Build and push multi-platform Docker image
+      uses: docker/build-push-action@v5
       with:
           context: .
           file: ./Dockerfile
-          push: false
-          tags: ldxw/openlist:api_server
-          labels: latest
-          
-    - name: Push Docker Image to ghcrio
-      run:     docker push ldxw/openlist:api_server
-            && docker tag  ldxw/openlist:api_server ghcr.io/ldxw/openlist_api_server:latest
-            && docker push ghcr.io/ldxw/openlist_api_server:latest
-  
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ldxw/openlist:api_server
+            ghcr.io/ldxw/openlist_api_server:latest
+          provenance: false  # optional: disables attestation metadata if not needed
